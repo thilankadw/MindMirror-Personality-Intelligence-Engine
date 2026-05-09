@@ -1,0 +1,61 @@
+services:
+  api:
+    build: .
+    ports:
+      - "${API_PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DOCKER_DATABASE_URL:-${DOCKER_DATABASE_URL}}
+      CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:3000","*"]}
+      ENV: ${ENV:-local}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      JSON_LOGS: ${JSON_LOGS:-true}
+      SECRET_KEY: ${SECRET_KEY:-change-me-please}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+      CREATE_TABLES_ON_STARTUP: ${CREATE_TABLES_ON_STARTUP:-false}
+      # Redis and Kafka are intentionally disabled. Signup inference uses DB-backed jobs.
+      # REDIS_HOST: ${REDIS_HOST}
+      # REDIS_PORT: ${REDIS_PORT:-6380}
+      SIGNUP_SYNC_WAIT_SECONDS: ${SIGNUP_SYNC_WAIT_SECONDS:-8}
+      # INFERENCE_CONSUMER_GROUP: ${INFERENCE_CONSUMER_GROUP:-signup-inference-consumer}
+      # INFERENCE_TOPIC_SIGNUP_REQUESTED: ${INFERENCE_TOPIC_SIGNUP_REQUESTED:-inference.signup.requested}
+      # INFERENCE_TOPIC_SIGNUP_COMPLETED: ${INFERENCE_TOPIC_SIGNUP_COMPLETED:-inference.signup.completed}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./api:/app/api
+      - ./src:/app/src
+      - ./utils:/app/utils
+      - ./pipelines:/app/pipelines
+      - ./config.yaml:/app/config.yaml:ro
+
+  worker:
+    build: .
+    command:
+      - sh
+      - -c
+      - |
+        python -c "import demoji" >/dev/null 2>&1 || pip install --no-cache-dir "demoji>=1.1.0,<2.0.0"
+        python -m src.workers.signup_inference_consumer
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DOCKER_DATABASE_URL:-${DOCKER_DATABASE_URL}}
+      # Redis and Kafka are intentionally disabled. Signup inference uses DB-backed jobs.
+      # REDIS_HOST: ${REDIS_HOST}
+      # REDIS_PORT: ${REDIS_PORT:-6380}
+      # INFERENCE_CONSUMER_GROUP: ${INFERENCE_CONSUMER_GROUP:-signup-inference-consumer}
+      # INFERENCE_TOPIC_SIGNUP_REQUESTED: ${INFERENCE_TOPIC_SIGNUP_REQUESTED:-inference.signup.requested}
+      # INFERENCE_TOPIC_SIGNUP_COMPLETED: ${INFERENCE_TOPIC_SIGNUP_COMPLETED:-inference.signup.completed}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./api:/app/api
+      - ./src:/app/src
+      - ./utils:/app/utils
+      - ./pipelines:/app/pipelines
+      - ./artifacts:/app/artifacts:ro
+      - ./config.yaml:/app/config.yaml:ro

@@ -1,0 +1,271 @@
+project:
+  name: mindmirror
+  environment: local
+  timezone: Asia/Colombo
+services:
+  api:
+    host: 0.0.0.0
+    port: 8000
+    base_path: /api/v1
+  worker:
+    name: personality_inference_worker
+db:
+  postgres:
+    host: postgres
+    port: 5432
+    database: mindmirror
+    user: mindmirror
+    password: mindmirror
+    schema: public
+    pool_size: 10
+    max_overflow: 20
+pipeline:
+  feature_schema_version: v1
+  week_window:
+    week_start: monday
+    timezone: Asia/Colombo
+environment:
+  week_window: 1
+  dataset_version: v1.0
+logging:
+  level: INFO
+  file: pipeline.log
+team:
+  members:
+    member1:
+      name: thilanka
+      domains:
+      - personality
+      owns_models:
+      - big5_openness_state
+      - big5_conscientiousness_state
+      - big5_extraversion_state
+      - big5_agreeableness_state
+      - big5_neuroticism_state
+artifacts:
+  base_dir: artifacts
+  feature_schemas_dir: artifacts/feature_schemas
+  predictions_dir: artifacts/predictions
+  evaluation_dir: artifacts/evaluation
+  local_models_dir: artifacts/models
+  domains:
+    personality:
+      models_dir: artifacts/models/personality
+      evaluation_dir: artifacts/evaluation/personality
+      data_dir: artifacts/data/personality
+domains:
+  personality:
+    owner: member1
+    data_paths:
+      raw_dir: data/personality/raw
+      processed_dir: data/personality/processed
+      weekly_dataset: data/personality/processed/weekly_processed_posts_all5.csv
+    preprocessing:
+      text_column: processed_text
+      user_column: author
+      week_column: week
+      time_sort_column: week_date
+      created_date_column: created_date
+      min_posts_per_week: 1
+    features:
+      embedding_feature_name: text_embeddings_mean_w
+      temporal_features:
+      - gap_weeks
+      group_feature: author
+    targets:
+      openness: openness_dir
+      conscientiousness: conscientiousness_dir
+      extraversion: extraversion_dir
+      agreeableness: agreeableness_dir
+      neuroticism: neuroticism_dir
+    traits:
+      openness:
+        direction:
+          test_size: 0.2
+          k_past: 4
+          h_future: 4
+          tau_quantile: 0.6
+        data_paths:
+          data_path: data/personality/processed/weekly_processed_posts_all5.csv
+          raw_json: data/personality/raw/reddit_post_data.json
+          data_artifacts_dir: ../../artifacts/data/personality/openness
+          processed_data_dir: ../../data/processed
+          X_train: artifacts/data/personality/openness/X_train.csv
+          X_test: artifacts/data/personality/openness/X_test.csv
+          Y_train: artifacts/data/personality/openness/Y_train.csv
+          Y_test: artifacts/data/personality/openness/Y_test.csv
+          data_pipeline_metadata: artifacts/data/personality/openness/data_pipeline_metadata.json
+        model:
+          model_path: artifacts/models/personality/openness/model.joblib
+          evaluation_path: artifacts/evaluation/personality/openness/evaluation.json
+          label_encoder_path: artifacts/models/personality/openness/label_encoder.joblib
+      conscientiousness:
+        direction:
+          test_size: 0.2
+          k_past: 4
+          h_future: 4
+          tau_quantile: 0.7
+        data_paths:
+          data_path: data/personality/processed/weekly_processed_posts_all5.csv
+          raw_json: data/personality/raw/reddit_post_data.json
+          data_artifacts_dir: ../../artifacts/data/personality/conscientiousness
+          processed_data_dir: ../../data/processed
+          X_train: artifacts/data/personality/conscientiousness/X_train.csv
+          X_test: artifacts/data/personality/conscientiousness/X_test.csv
+          Y_train: artifacts/data/personality/conscientiousness/Y_train.csv
+          Y_test: artifacts/data/personality/conscientiousness/Y_test.csv
+          data_pipeline_metadata: artifacts/data/personality/conscientiousness/data_pipeline_metadata.json
+        model:
+          model_path: artifacts/models/personality/conscientiousness/model.joblib
+          evaluation_path: artifacts/evaluation/personality/conscientiousness/evaluation.json
+          label_encoder_path: artifacts/models/personality/conscientiousness/label_encoder.joblib
+      extraversion:
+        direction:
+          test_size: 0.2
+          k_past: 4
+          h_future: 4
+          tau_quantile: 0.7
+        data_paths:
+          data_path: data/personality/processed/weekly_processed_posts_all5.csv
+          raw_json: data/personality/raw/reddit_post_data.json
+          data_artifacts_dir: ../../artifacts/data/personality/extraversion
+          processed_data_dir: ../../data/processed
+          X_train: artifacts/data/personality/extraversion/X_train.csv
+          X_test: artifacts/data/personality/extraversion/X_test.csv
+          Y_train: artifacts/data/personality/extraversion/Y_train.csv
+          Y_test: artifacts/data/personality/extraversion/Y_test.csv
+          data_pipeline_metadata: artifacts/data/personality/extraversion/data_pipeline_metadata.json
+        model:
+          model_path: artifacts/models/personality/extraversion/model.joblib
+          evaluation_path: artifacts/evaluation/personality/extraversion/evaluation.json
+          label_encoder_path: artifacts/models/personality/extraversion/label_encoder.joblib
+      agreeableness:
+        direction:
+          test_size: 0.2
+          k_past: 4
+          h_future: 4
+          tau_quantile: 0.7
+        data_paths:
+          data_path: data/personality/processed/weekly_processed_posts_all5.csv
+          raw_json: data/personality/raw/reddit_post_data.json
+          data_artifacts_dir: ../../artifacts/data/personality/agreeableness
+          processed_data_dir: ../../data/processed
+          X_train: artifacts/data/personality/agreeableness/X_train.csv
+          X_test: artifacts/data/personality/agreeableness/X_test.csv
+          Y_train: artifacts/data/personality/agreeableness/Y_train.csv
+          Y_test: artifacts/data/personality/agreeableness/Y_test.csv
+          data_pipeline_metadata: artifacts/data/personality/agreeableness/data_pipeline_metadata.json
+        model:
+          model_path: artifacts/models/personality/agreeableness/model.joblib
+          evaluation_path: artifacts/evaluation/personality/agreeableness/evaluation.json
+          label_encoder_path: artifacts/models/personality/agreeableness/label_encoder.joblib
+      neuroticism:
+        direction:
+          test_size: 0.2
+          k_past: 4
+          h_future: 4
+          tau_quantile: 0.7
+        data_paths:
+          data_path: data/personality/processed/weekly_processed_posts_all5.csv
+          raw_json: data/personality/raw/reddit_post_data.json
+          data_artifacts_dir: ../../artifacts/data/personality/neuroticism
+          processed_data_dir: ../../data/processed
+          X_train: artifacts/data/personality/neuroticism/X_train.csv
+          X_test: artifacts/data/personality/neuroticism/X_test.csv
+          Y_train: artifacts/data/personality/neuroticism/Y_train.csv
+          Y_test: artifacts/data/personality/neuroticism/Y_test.csv
+          data_pipeline_metadata: artifacts/data/personality/neuroticism/data_pipeline_metadata.json
+        model:
+          model_path: artifacts/models/personality/neuroticism/model.joblib
+          evaluation_path: artifacts/evaluation/personality/neuroticism/evaluation.json
+          label_encoder_path: artifacts/models/personality/neuroticism/label_encoder.joblib
+training:
+  task_type: classification
+model:
+  model_type: xgboost
+  random_forest_params:
+    n_estimators: 400
+    random_state: 42
+    n_jobs: -1
+    class_weight: null
+  hist_gradient_boosting_params:
+    random_state: 42
+    max_depth: 6
+    learning_rate: 0.1
+  xgboost_params:
+    n_estimators: 400
+    max_depth: 6
+    learning_rate: 0.05
+    subsample: 0.8
+    colsample_bytree: 0.8
+    objective: multi:softprob
+    eval_metric: mlogloss
+    random_state: 42
+    n_jobs: -1
+mlflow:
+  tracking_uri: http://localhost:5000
+  fallback_tracking_uri: file:./mlruns
+  artifact_root: s3://mindmirror-artifacts
+  experiment_name: MindMirror_Offline_Training
+  run_policy:
+    use_nested_runs: true
+    parent_run_name_prefix: mindmirror
+    autolog: true
+    parent_tags:
+      project: mindmirror
+      pipeline: offline_training
+      feature_schema_version: v1
+    child_tags:
+      component: model
+  registry:
+    stage: Production
+    allow_staging: true
+    register_mode: per_model
+  models:
+  - key: big5_openness_state
+    domain: personality
+    owner: member1
+    registry_name: mm_openness_state
+    task: classification
+    target: openness_dir
+    artifact_path: model
+    local_fallback_path: artifacts/models/personality/openness/model.joblib
+  - key: big5_conscientiousness_state
+    domain: personality
+    owner: member1
+    registry_name: mm_conscientiousness_state
+    task: classification
+    target: conscientiousness_dir
+    artifact_path: model
+    local_fallback_path: artifacts/models/personality/conscientiousness/model.joblib
+  - key: big5_extraversion_state
+    domain: personality
+    owner: member1
+    registry_name: mm_extraversion_state
+    task: classification
+    target: extraversion_dir
+    artifact_path: model
+    local_fallback_path: artifacts/models/personality/extraversion/model.joblib
+  - key: big5_agreeableness_state
+    domain: personality
+    owner: member1
+    registry_name: mm_agreeableness_state
+    task: classification
+    target: agreeableness_dir
+    artifact_path: model
+    local_fallback_path: artifacts/models/personality/agreeableness/model.joblib
+  - key: big5_neuroticism_state
+    domain: personality
+    owner: member1
+    registry_name: mm_neuroticism_state
+    task: classification
+    target: neuroticism_dir
+    artifact_path: model
+    local_fallback_path: artifacts/models/personality/neuroticism/model.joblib
+inference_loading:
+  model_stage: Production
+  load_all_models: true
+  load_domains:
+  - personality
+  strict_feature_schema: true
+  request_timeout_seconds: 10

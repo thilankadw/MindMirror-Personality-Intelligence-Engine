@@ -1,0 +1,41 @@
+# API + signup/signin + personality signup inference worker.
+
+# API runtime
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+pydantic==2.8.2
+pydantic-settings==2.4.0
+python-dotenv==1.0.1
+email-validator==2.2.0
+python-multipart>=0.0.9,<1.0.0
+python-jose[cryptography]>=3.3.0,<4.0.0
+passlib[bcrypt]>=1.7.4,<2.0.0
+bcrypt==4.0.1
+
+# Database + DB-backed signup queue
+sqlalchemy==2.0.34
+asyncpg>=0.29,<1.0.0
+psycopg2-binary==2.9.9
+
+# Reddit/OAuth and extraction
+requests==2.32.3
+praw==7.8.1
+
+# Inference/data dependencies needed by active routes and signup worker
+numpy==2.1.1
+pandas==2.2.2
+scikit-learn==1.5.2
+joblib==1.4.2
+xgboost==1.7.6
+PyYAML>=6.0.2,<7.0.0
+demoji>=1.1.0,<2.0.0
+tqdm>=4.66.5,<5.0.0
+# Use direct CUDA-enabled PyTorch wheels on Windows to avoid uv multi-index conflicts.
+torch @ https://download.pytorch.org/whl/cu124/torch-2.6.0%2Bcu124-cp311-cp311-win_amd64.whl ; platform_system == "Windows" and python_version == "3.11"
+torch @ https://download.pytorch.org/whl/cu124/torch-2.6.0%2Bcu124-cp312-cp312-win_amd64.whl ; platform_system == "Windows" and python_version == "3.12"
+torch>=2.5.1,<2.7.0; platform_system != "Windows"
+transformers>=4.44.0,<5.0.0
+tokenizers>=0.19.0,<1.0.0
+sentencepiece>=0.2.0,<1.0.0
+protobuf>=4.21.0,<6.0.0
+mlflow>=2.16.0,<3.0.0
